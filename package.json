@@ -1,0 +1,20 @@
+{
+  "name": "snake-game-tests",
+  "version": "1.0.0",
+  "description": "GUI tests for Snake Game",
+  "scripts": {
+    "test": "jest --verbose",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "snake",
+    "game",
+    "tests"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}

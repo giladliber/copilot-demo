@@ -146,6 +146,8 @@
 
         .game-over button {
             margin-top: 20px;
+            margin-left: 5px;
+            margin-right: 5px;
             padding: 15px 30px;
             font-size: 1.1em;
         }
@@ -193,6 +195,7 @@
         <p>Final Score: <strong id="finalScore">0</strong></p>
         <p id="newRecord" style="color: #667eea; display: none;">🎉 New Record!</p>
         <button onclick="restartGame()">Play Again</button>
+        <button onclick="closeGameOver()">Close</button>
     </div>
 
     <script>
@@ -390,6 +393,12 @@
             document.getElementById('highScore').textContent = highScore;
             resetGame();
             startGame();
+        }
+
+        function closeGameOver() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('gameOverModal').style.display = 'none';
+            document.getElementById('highScore').textContent = highScore;
         }
 
         // Initial draw

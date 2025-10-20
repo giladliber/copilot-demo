@@ -97,10 +97,13 @@ describe('SnakeGame - GUI Tests', () => {
         });
 
         test('should have food generated at valid position', () => {
-            expect(game.food.x).toBeGreaterThanOrEqual(0);
-            expect(game.food.x).toBeLessThan(game.tileCount);
-            expect(game.food.y).toBeGreaterThanOrEqual(0);
-            expect(game.food.y).toBeLessThan(game.tileCount);
+            expect(game.food.length).toBeGreaterThan(0);
+            game.food.forEach(foodItem => {
+                expect(foodItem.x).toBeGreaterThanOrEqual(0);
+                expect(foodItem.x).toBeLessThan(game.tileCount);
+                expect(foodItem.y).toBeGreaterThanOrEqual(0);
+                expect(foodItem.y).toBeLessThan(game.tileCount);
+            });
         });
 
         test('should render initial game state', () => {
@@ -220,7 +223,7 @@ describe('SnakeGame - GUI Tests', () => {
             const initialScore = game.score;
             
             // Position snake to eat food
-            game.snake[0] = { x: game.food.x - 1, y: game.food.y };
+            game.snake[0] = { x: game.food[0].x - 1, y: game.food[0].y };
             game.direction = { x: 1, y: 0 };
             game.nextDirection = { x: 1, y: 0 };
             
@@ -234,7 +237,7 @@ describe('SnakeGame - GUI Tests', () => {
             const initialLength = game.snake.length;
             
             // Position snake to eat food
-            game.snake[0] = { x: game.food.x - 1, y: game.food.y };
+            game.snake[0] = { x: game.food[0].x - 1, y: game.food[0].y };
             game.direction = { x: 1, y: 0 };
             game.nextDirection = { x: 1, y: 0 };
             
@@ -245,16 +248,55 @@ describe('SnakeGame - GUI Tests', () => {
 
         test('should generate new food after consumption', () => {
             game.startGame();
-            const oldFood = { ...game.food };
+            const oldFoodCount = game.food.length;
+            const firstFood = game.food[0];
             
             // Position snake to eat food
-            game.snake[0] = { x: game.food.x - 1, y: game.food.y };
+            game.snake[0] = { x: firstFood.x - 1, y: firstFood.y };
             game.direction = { x: 1, y: 0 };
             game.nextDirection = { x: 1, y: 0 };
             
             game.update();
             
-            expect(game.food).not.toEqual(oldFood);
+            // Should still have same number of food items
+            expect(game.food.length).toBe(oldFoodCount);
+            // The specific food item should have been replaced
+            expect(game.food.some(f => f.x === firstFood.x && f.y === firstFood.y)).toBe(false);
+        });
+
+        test('should generate multiple food items', () => {
+            expect(game.food.length).toBe(3);
+            
+            // Check all food items have valid positions
+            game.food.forEach(foodItem => {
+                expect(foodItem.x).toBeGreaterThanOrEqual(0);
+                expect(foodItem.x).toBeLessThan(game.tileCount);
+                expect(foodItem.y).toBeGreaterThanOrEqual(0);
+                expect(foodItem.y).toBeLessThan(game.tileCount);
+            });
+            
+            // Check food items don't overlap
+            for (let i = 0; i < game.food.length; i++) {
+                for (let j = i + 1; j < game.food.length; j++) {
+                    expect(game.food[i].x !== game.food[j].x || game.food[i].y !== game.food[j].y).toBe(true);
+                }
+            }
+        });
+
+        test('should be able to eat any of the multiple food items', () => {
+            game.startGame();
+            const initialScore = game.score;
+            const secondFood = game.food[1];
+            
+            // Position snake to eat second food item
+            game.snake[0] = { x: secondFood.x - 1, y: secondFood.y };
+            game.direction = { x: 1, y: 0 };
+            game.nextDirection = { x: 1, y: 0 };
+            
+            game.update();
+            
+            expect(game.score).toBe(initialScore + 10);
+            expect(game.food.some(f => f.x === secondFood.x && f.y === secondFood.y)).toBe(false);
         });
     });
 

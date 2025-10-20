@@ -11,6 +11,7 @@ class SnakeGame {
         ];
         this.direction = { x: 1, y: 0 };
         this.nextDirection = { x: 1, y: 0 };
+        this.foodCount = 3;
         this.food = this.generateFood();
         this.score = 0;
         this.highScore = localStorage.getItem('snakeHighScore') || 0;
@@ -21,6 +22,33 @@ class SnakeGame {
     }
 
     generateFood() {
+        const foodItems = [];
+        
+        for (let i = 0; i < this.foodCount; i++) {
+            let newFood;
+            let validPosition = false;
+
+            while (!validPosition) {
+                newFood = {
+                    x: Math.floor(Math.random() * this.tileCount),
+                    y: Math.floor(Math.random() * this.tileCount)
+                };
+
+                // Check if position overlaps with snake or other food items
+                validPosition = !this.snake.some(
+                    segment => segment.x === newFood.x && segment.y === newFood.y
+                ) && !foodItems.some(
+                    food => food.x === newFood.x && food.y === newFood.y
+                );
+            }
+
+            foodItems.push(newFood);
+        }
+
+        return foodItems;
+    }
+
+    generateSingleFood() {
         let newFood;
         let validPosition = false;
 
@@ -30,12 +58,15 @@ class SnakeGame {
                 y: Math.floor(Math.random() * this.tileCount)
             };
 
+            // Check if position overlaps with snake or other food items
             validPosition = !this.snake.some(
                 segment => segment.x === newFood.x && segment.y === newFood.y
+            ) && !this.food.some(
+                food => food.x === newFood.x && food.y === newFood.y
             );
         }
 
-        return newFood;
+        return [newFood];
     }
 
     startGame() {
@@ -136,9 +167,12 @@ class SnakeGame {
         this.snake.unshift(head);
 
         // Check food collision
-        if (head.x === this.food.x && head.y === this.food.y) {
+        const foodIndex = this.food.findIndex(food => food.x === head.x && food.y === head.y);
+        if (foodIndex !== -1) {
             this.score += 10;
-            this.food = this.generateFood();
+            // Remove eaten food and generate a new one
+            this.food.splice(foodIndex, 1);
+            this.food.push(...this.generateSingleFood());
         } else {
             this.snake.pop();
         }
@@ -166,16 +200,18 @@ class SnakeGame {
         });
 
         // Draw food
-        this.ctx.fillStyle = '#ff0000';
-        this.ctx.beginPath();
-        this.ctx.arc(
-            this.food.x * this.gridSize + this.gridSize / 2,
-            this.food.y * this.gridSize + this.gridSize / 2,
-            this.gridSize / 2 - 2,
-            0,
-            Math.PI * 2
-        );
-        this.ctx.fill();
+        this.food.forEach(foodItem => {
+            this.ctx.fillStyle = '#ff0000';
+            this.ctx.beginPath();
+            this.ctx.arc(
+                foodItem.x * this.gridSize + this.gridSize / 2,
+                foodItem.y * this.gridSize + this.gridSize / 2,
+                this.gridSize / 2 - 2,
+                0,
+                Math.PI * 2
+            );
+            this.ctx.fill();
+        });
     }
 
     endGame() {
